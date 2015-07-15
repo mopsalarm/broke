@@ -22,6 +22,7 @@ MessageHeader = construct.Struct(
     "MessageHeader",
     construct.Magic(b"\x00" * 8),
     construct.ULInt32("length"),
+    construct.ULInt64("timestamp"),
     construct.String("topic", 64, padchar="\x00", encoding="ascii"))
 
 EMPTY_HEADER = b"\x00" * BlockHeader.sizeof()
@@ -70,9 +71,12 @@ class BrokeWriter(object):
 
     def store(self, topic, payload):
         if not isinstance(payload, bytes):
-            raise IOError("can only store data of type bytes")
+            raise IOError("Can only store data of type bytes")
 
-        header = construct.Container(length=len(payload), topic=topic)
+        if not isinstance(topic, str):
+            raise IOError("Topic must be str")
+
+        header = construct.Container(length=len(payload), topic=topic, timestamp=int(time.time() * 1000))
         self.buffer.write(MessageHeader.build(header))
         self.buffer.write(payload)
 
