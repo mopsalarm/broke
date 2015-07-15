@@ -84,8 +84,12 @@ class BrokeWriter(object):
         self.raw_buffer = io.BytesIO()
         self.buffer = gzip.GzipFile(fileobj=self.raw_buffer, mode="wb")
 
+    @property
+    def dirty(self):
+        return self.buffer.tell() > 0
+
     def commit(self):
-        if not self.buffer.tell():
+        if not self.dirty:
             return
 
         # compress data in memory and reset the buffer
