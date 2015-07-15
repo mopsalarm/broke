@@ -1,3 +1,4 @@
+from collections import namedtuple
 from contextlib import contextmanager
 import os
 import zlib
@@ -27,6 +28,7 @@ MessageHeader = construct.Struct(
 
 EMPTY_HEADER = b"\x00" * BlockHeader.sizeof()
 
+Message = namedtuple("Message", ["topic", "time", "payload"])
 
 @contextmanager
 def lock(fp, shared=False, timeout=5, retry_interval=0.25):
@@ -177,7 +179,7 @@ def iter_messages(fp):
 
         header = MessageHeader.parse(header_bytes)
         payload = read_fully(fp, header.length)
-        yield header.topic, payload
+        yield Message(header.topic, header.timestamp, payload)
 
 
 def read_messages(fp):
