@@ -111,13 +111,12 @@ class BrokeWriter(object):
             try:
                 fp.write(header_bytes)
                 fp.write(compressed)
+                fp.flush()
 
                 # now update the header
                 fp.seek(start)
                 header.committed = True
                 fp.write(BlockHeader.build(header))
-
-                # everything looks good, flush to disk!
                 fp.flush()
 
             except:
